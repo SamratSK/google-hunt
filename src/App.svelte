@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import Loader from "./Loader.svelte";
   import { error } from "./stores/common";
 
-  let question: string;
+  let question: string = "Loading...";
+  let loaderVisible: boolean = false;
   let unsubscriber = error.subscribe((value) => {
     if (value) {
       document.body.style.backgroundColor = "rgb(44, 1, 2)";
@@ -13,17 +15,24 @@
   });
 
   onMount(() => {
-    let [_, batch, slug] = window.location.pathname.split("/");
+    let [_, batch, slug] = window.location.hash.split("/");
+
+    loaderVisible = true;
+    console.log(loaderVisible);
     fetch(`http://googlehunt.maginnow.com/api/questions/${batch}/${slug}`)
       .then((res) => res.json())
       .then((data: [any]) => {
         if (data.length <= 0) {
           error.set(true);
           question = "Unable to retrieve question!";
+          return;
         }
 
         error.set(false);
         question = data[0].text;
+      })
+      .finally(() => {
+        loaderVisible = false;
       });
   });
 
@@ -34,11 +43,14 @@
 
 <main>
   <header class="cursive">Google Hunt</header>
-  <div class="url">www.url.com/&lt;your answer&gt;</div>
   <div class="question">{question}</div>
+
+  {#if loaderVisible}
+    <Loader />
+  {/if}
 </main>
 
-<style lang="scss">
+<style lang="scss" scoped>
   main {
     width: 90%;
 
@@ -52,10 +64,6 @@
   header {
     margin: 0;
     font-size: 4rem;
-  }
-
-  .url {
-    margin-top: 0.75rem;
   }
 
   .question {
