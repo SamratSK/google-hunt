@@ -23,7 +23,6 @@
       .then((res) => res.json())
       .then((data: [any]) => {
         if (data.length <= 0) {
-          error.set(true);
           question = "Unable to retrieve question!";
           return;
         }
