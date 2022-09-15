@@ -17,9 +17,14 @@
   onMount(() => {
     let [_, batch, slug] = window.location.hash.split("/");
 
+    if (!batch || !slug) {
+      error.set(true);
+      question = "No parameters found";
+      return;
+    }
+
     loaderVisible = true;
-    console.log(loaderVisible);
-    fetch(`http://googlehunt.maginnow.com/api/questions/${batch}/${slug}`)
+    fetch(`/api/questions/${batch}/${slug}`)
       .then((res) => res.json())
       .then((data: [any]) => {
         if (data.length <= 0) {
@@ -68,5 +73,9 @@
   .question {
     margin-top: 1.5rem;
     font-size: 105%;
+
+    white-space: pre-wrap;
+    line-height: 1.5;
+    text-align: center;
   }
 </style>
